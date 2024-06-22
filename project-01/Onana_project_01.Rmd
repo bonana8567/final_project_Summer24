@@ -1,0 +1,68 @@
+---
+title: "Project"
+author: "Berthe Onana"
+date: "2024-06-03"
+output: html_document
+---
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(mapview)
+```
+
+```{r}
+data <- read.csv("rats_nyc.csv")
+head(data, 20)
+#Attempt to clean the data to remove the NA values 
+NewData <- na.omit(data)
+head(NewData, 20)
+#Every row has NA values so the NewData variable can't be use. 
+#Next time it's best to pick a more cleaner data set
+```
+
+```{r}
+#summarizing the data set1 to create the its visuals
+PlottingData <- data%>%
+filter(location_type == "Commercial Building")%>%
+select(location_type, city, status, latitude, longitude)
+Data1 <- head(PlottingData, 20)
+Data1
+#The data set below shows if commercial buildings located in different cities are either closed, assigned or pending due to rats invasions 
+
+#Plot 1: visualize it
+Data1%>%
+count(status)
+ggplot(data = Data1) +
+geom_bar(Data1, mapping = aes(x = status, color = status))
+```
+
+```{r}
+#summarizing the data set2 to create the its visuals
+PlottingData2 <- data%>%
+group_by(location_type)%>%
+select(location_type, city, status, latitude, longitude)
+Data2 <- head(PlottingData2, 50)
+Data2
+
+#Plot 2: Visualize which city has the most and least location type affected by rats
+#And which of those locations are active or not.
+ggplot(data = Data2) +
+geom_point(mapping = aes(x = status, y = location_type, 
+                         color = city, size = 2))
+#Brooklyn has the most variety in location type (for the few sample selected) affected by rats compared to Staten Island Bayside and Ridge wood which have the least
+```
+
+```{r}
+#summarizing the data set3 to create the its visuals
+PlottingData3 <- data%>%
+group_by(city)%>%
+select(location_type, city, status, latitude, longitude)%>%
+filter(city == "BROOKLYN", status == "Assigned" )
+Data3 <- head(PlottingData2, 10)
+Data3
+
+#Plot 3: Visualize which all the location types in Brooklyn that are affected by rats
+mapview(Data3, xcol = "longitude", ycol = "latitude", zcol = "location_type", crs = 4269, grid = FALSE)
+```
+

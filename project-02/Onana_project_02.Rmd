@@ -1,0 +1,59 @@
+---
+title: "Data Visualization - Mini-Project 2"
+author: "Berthe Onana Bonana8567@floridapoly.edu"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(sf)
+library(mapview)
+```
+
+
+```{r}
+starbucks <- read.csv("All_Starbucks_Locations_in_the_US_-_Map.csv")
+starbucks
+
+```
+
+```{r}
+#Which starbucks location has ownership type and which doesn’t depending on it's resident state
+data <- starbucks%>%
+  group_by(Ownership.Type)%>%
+  select(Features...Stations, Ownership.Type, State, Latitude, Longitude) 
+NewData <- head(data, 50)
+NewData
+#Determine how many ownership types are present in the data set
+NewData%>%
+count(Ownership.Type)
+#create one interactive plot
+#This particular plot shows if the state have drive through or don't
+ggplot(data = NewData, mapping = aes(x = Ownership.Type, y = State, color = Features...Stations)) + geom_point()
+```
+
+```{r}
+#creating one spatial visualization plot to view the Starbucks locations in Florida
+FloridaStarbucks <- starbucks%>%
+  group_by(State)%>%
+  select(Features...Stations, Zip, Ownership.Type, State, Latitude, Longitude)%>%
+  filter(State == "FL")
+NewData2 <- head(FloridaStarbucks, 50)
+NewData2
+myview <- mapview(NewData2, xcol = "Longitude", ycol = "Latitude", crs = 4269, grid = FALSE)
+myview
+```
+
+```{r}
+#creating one visualization of a model to see how far each starbucks zip codes are from each other
+NewData3 <- head(NewData2, 40)
+NewData3
+newdata <- separate(NewData3, Zip, "NewZip")
+linear_model <- lm(NewZip ~ Longitude + Latitude, data = newdata) 
+plot(linear_model) 
+```
+
